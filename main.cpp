@@ -4,11 +4,6 @@
 #include <set>
 using namespace std;
 
-struct Point {
-    long long x, y;
-    int id;
-};
-
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -16,42 +11,36 @@ int main() {
     int n;
     cin >> n;
 
-    vector<Point> points(n);
+    vector<pair<long long, long long>> points(n);
     for (int i = 0; i < n; i++) {
-        cin >> points[i].x >> points[i].y;
-        points[i].id = i;
+        cin >> points[i].first >> points[i].second;
     }
 
-    // Sort points by x-coordinate, then by y-coordinate
-    sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
-        if (a.x != b.x) return a.x < b.x;
-        return a.y < b.y;
-    });
+    // Sort by x-coordinate
+    sort(points.begin(), points.end());
 
     long long count = 0;
 
     // For each potential bottom-left corner
     for (int i = 0; i < n; i++) {
-        // Collect all points to the right of point i
-        set<long long> y_coords;
+        // Collect y-coordinates of points between i and j (exclusive)
+        multiset<long long> y_between;
 
-        // For each potential top-right corner
+        // For each potential top-right corner (with larger x)
         for (int j = i + 1; j < n; j++) {
-            // Check if points[j] can be top-right corner with points[i] as bottom-left
-            if (points[j].y > points[i].y) {
-                // Before considering this as top-right, check if the rectangle is empty
-                // We need to ensure no point in y_coords is in the range [points[i].y, points[j].y]
-
-                // Find if any y-coordinate in the set is within the range (points[i].y, points[j].y)
-                auto it = y_coords.upper_bound(points[i].y);
-                if (it == y_coords.end() || *it >= points[j].y) {
-                    // No point in between, this is a valid empty rectangle
+            // Check if this can form a rectangle with points[i] as bottom-left
+            if (points[j].second > points[i].second) {
+                // Check if any point in y_between has y in range (y_i, y_j)
+                // We need to find if there exists y such that points[i].second < y < points[j].second
+                auto it = y_between.upper_bound(points[i].second);
+                if (it == y_between.end() || *it >= points[j].second) {
+                    // No point strictly between y_i and y_j
                     count++;
                 }
             }
 
-            // Add current point's y-coordinate to the set for future checks
-            y_coords.insert(points[j].y);
+            // Add current point's y to between set for next iterations
+            y_between.insert(points[j].second);
         }
     }
 
