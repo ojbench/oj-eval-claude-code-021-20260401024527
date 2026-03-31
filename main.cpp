@@ -1,19 +1,16 @@
-#include <iostream>
+#include <cstdio>
 #include <vector>
 #include <algorithm>
 #include <set>
 using namespace std;
 
 int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(nullptr);
-
     int n;
-    cin >> n;
+    scanf("%d", &n);
 
-    vector<pair<long long, long long>> points(n);
+    vector<pair<int, int>> points(n);
     for (int i = 0; i < n; i++) {
-        cin >> points[i].first >> points[i].second;
+        scanf("%d%d", &points[i].first, &points[i].second);
     }
 
     // Sort by x-coordinate
@@ -23,28 +20,27 @@ int main() {
 
     // For each potential bottom-left corner
     for (int i = 0; i < n; i++) {
-        // Collect y-coordinates of points between i and j (exclusive)
-        multiset<long long> y_between;
+        set<int> y_set;
 
         // For each potential top-right corner (with larger x)
         for (int j = i + 1; j < n; j++) {
+            int y_i = points[i].second;
+            int y_j = points[j].second;
+
             // Check if this can form a rectangle with points[i] as bottom-left
-            if (points[j].second > points[i].second) {
-                // Check if any point in y_between has y in range (y_i, y_j)
-                // We need to find if there exists y such that points[i].second < y < points[j].second
-                auto it = y_between.upper_bound(points[i].second);
-                if (it == y_between.end() || *it >= points[j].second) {
-                    // No point strictly between y_i and y_j
+            if (y_j > y_i) {
+                // Check if any point in y_set has y in range (y_i, y_j)
+                auto it = y_set.upper_bound(y_i);
+                if (it == y_set.end() || *it >= y_j) {
                     count++;
                 }
             }
 
-            // Add current point's y to between set for next iterations
-            y_between.insert(points[j].second);
+            y_set.insert(y_j);
         }
     }
 
-    cout << count << endl;
+    printf("%lld\n", count);
 
     return 0;
 }
