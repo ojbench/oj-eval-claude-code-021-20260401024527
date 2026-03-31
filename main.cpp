@@ -30,30 +30,28 @@ int main() {
 
     long long count = 0;
 
-    // For each pair of points, check if they can form an empty rectangle
+    // For each potential bottom-left corner
     for (int i = 0; i < n; i++) {
+        // Collect all points to the right of point i
+        set<long long> y_coords;
+
+        // For each potential top-right corner
         for (int j = i + 1; j < n; j++) {
-            // points[i] is bottom-left candidate, points[j] is top-right candidate
-            if (points[i].x >= points[j].x || points[i].y >= points[j].y) {
-                continue; // Not a valid rectangle (not bottom-left to top-right)
-            }
+            // Check if points[j] can be top-right corner with points[i] as bottom-left
+            if (points[j].y > points[i].y) {
+                // Before considering this as top-right, check if the rectangle is empty
+                // We need to ensure no point in y_coords is in the range [points[i].y, points[j].y]
 
-            // Check if any point lies inside or on the boundary (except the two corners)
-            bool empty = true;
-            for (int k = 0; k < n; k++) {
-                if (k == i || k == j) continue;
-
-                // Check if point k is inside or on the boundary of the rectangle
-                if (points[k].x >= points[i].x && points[k].x <= points[j].x &&
-                    points[k].y >= points[i].y && points[k].y <= points[j].y) {
-                    empty = false;
-                    break;
+                // Find if any y-coordinate in the set is within the range (points[i].y, points[j].y)
+                auto it = y_coords.upper_bound(points[i].y);
+                if (it == y_coords.end() || *it >= points[j].y) {
+                    // No point in between, this is a valid empty rectangle
+                    count++;
                 }
             }
 
-            if (empty) {
-                count++;
-            }
+            // Add current point's y-coordinate to the set for future checks
+            y_coords.insert(points[j].y);
         }
     }
 
